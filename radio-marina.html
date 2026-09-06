@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">103.7 — Радио Marina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood-dark:#0b1a1c;
+    --wood:#163134;
+    --wood-light:#295357;
+    --brass:#5fd9c4;
+    --brass-light:#d8fff400;
+    --brass-glow:#8ff5e0;
+    --cream:#dff3ee;
+    --amber:#3fd4ff;
+    --static:#7fa6a3;
+    --ink:#04090a;
+    --paper:#eef7f4;
+    --paper-ink:#193232;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    background:radial-gradient(ellipse at 50% 20%, #10282a 0%, var(--ink) 70%);
+    min-height:100vh;
+    font-family:'EB Garamond', serif;
+    color:var(--cream);
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:flex-end;
+    padding:14px 16px 0;
+  }
+
+  .stage{
+    min-height:calc(100vh - 46px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:16px 16px 48px;
+    position:relative;
+  }
+
+  /* ---- LANGUAGE SWITCH ---- */
+  .lang-switch{
+    display:flex;
+    background:rgba(11,26,28,0.72);
+    border:1px solid #2f5457;
+    border-radius:20px;
+    padding:3px;
+    backdrop-filter:blur(4px);
+    box-shadow:0 6px 16px rgba(0,0,0,0.4);
+  }
+  .lang-switch button{
+    font-family:'Share Tech Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--static);
+    background:none;
+    border:none;
+    padding:6px 12px;
+    border-radius:16px;
+    cursor:pointer;
+    transition:background .2s ease, color .2s ease;
+  }
+  .lang-switch button.active{
+    background:var(--brass);
+    color:var(--ink);
+  }
+  .lang-switch button:focus-visible{
+    outline:2px solid var(--brass-glow);
+    outline-offset:2px;
+  }
+
+  .preamble{
+    text-align:center;
+    max-width:420px;
+    margin-bottom:22px;
+    margin-top:6px;
+  }
+  .preamble .eyebrow{
+    font-family:'Share Tech Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    color:var(--static);
+  }
+  .preamble h1{
+    font-weight:500;
+    font-size:clamp(22px, 5vw, 28px);
+    margin:6px 0 0;
+    color:var(--brass-glow);
+    font-style:italic;
+  }
+
+  /* ---- RADIO CABINET ---- */
+  .radio{
+    position:relative;
+    width:min(92vw, 420px);
+    background:
+      linear-gradient(155deg, var(--wood-light), var(--wood) 45%, var(--wood-dark) 100%);
+    border-radius:18px;
+    padding:22px 22px 26px;
+    box-shadow:
+      0 30px 60px -20px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -2px 6px rgba(0,0,0,0.5);
+    border:1px solid #0e2224;
+  }
+  .radio::before{
+    /* wood grain texture */
+    content:"";
+    position:absolute; inset:0;
+    border-radius:18px;
+    background-image: repeating-linear-gradient(100deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 2px, transparent 6px);
+    pointer-events:none;
+    mix-blend-mode:overlay;
+  }
+  .plate{
+    text-align:center;
+    font-family:'Share Tech Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.2em;
+    color:var(--brass);
+    margin-bottom:14px;
+    opacity:0.85;
+  }
+
+  /* glass display */
+  .glass{
+    position:relative;
+    background:#050d0e;
+    border-radius:8px;
+    padding:16px 14px 12px;
+    box-shadow:inset 0 2px 10px rgba(0,0,0,0.9), inset 0 0 0 1px #000;
+    overflow:hidden;
+  }
+  .glass canvas{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    opacity:var(--static-opacity, 1);
+    transition:opacity .35s ease;
+  }
+  .readout{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:8px;
+  }
+  .freq-num{
+    font-family:'Share Tech Mono', monospace;
+    font-size:clamp(34px, 9vw, 46px);
+    letter-spacing:0.03em;
+    color:var(--amber);
+    text-shadow:0 0 10px rgba(63,212,255,0.55), 0 0 2px rgba(63,212,255,0.9);
+    transition:color .3s ease, text-shadow .3s ease;
+  }
+  .freq-unit{
+    font-family:'Share Tech Mono', monospace;
+    font-size:13px;
+    color:var(--static);
+    letter-spacing:0.12em;
+  }
+  .station-name{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    min-height:20px;
+    font-family:'Share Tech Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.1em;
+    color:var(--static);
+    margin-top:4px;
+  }
+  .locked .station-name{ color:var(--amber); }
+
+  /* signal bars */
+  .bars{
+    position:relative; z-index:2;
+    display:flex; align-items:flex-end; justify-content:center;
+    gap:4px; height:22px; margin-top:10px;
+  }
+  .bars span{
+    width:4px; border-radius:1px;
+    background:var(--static);
+    height:20%;
+    transition:background .3s ease;
+  }
+  .locked .bars span{ background:var(--amber); }
+
+  /* dial scale */
+  .scale-wrap{
+    margin-top:18px;
+    padding:0 4px;
+  }
+  .scale{
+    position:relative;
+    height:34px;
+  }
+  .scale svg{ width:100%; height:100%; display:block; }
+  .scale-labels{
+    display:flex; justify-content:space-between;
+    font-family:'Share Tech Mono', monospace;
+    font-size:10px;
+    color:var(--static);
+    margin-top:2px;
+    padding:0 2px;
+  }
+  .needle{
+    position:absolute; top:0; bottom:6px;
+    width:2px; background:var(--amber);
+    box-shadow:0 0 6px rgba(63,212,255,0.8);
+    transform:translateX(-1px);
+    transition:left .12s linear;
+  }
+
+  /* knob + controls */
+  .controls{
+    display:flex; align-items:center; justify-content:center;
+    gap:22px; margin-top:20px;
+  }
+  .nudge{
+    width:38px; height:38px; border-radius:50%;
+    border:1px solid #10262a;
+    background:linear-gradient(160deg, var(--wood-light), var(--wood-dark));
+    color:var(--cream);
+    font-family:'Share Tech Mono', monospace;
+    font-size:16px;
+    cursor:pointer;
+    box-shadow:0 3px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .nudge:active{ transform:translateY(1px); }
+  .nudge:focus-visible, .knob:focus-visible{ outline:2px solid var(--brass-glow); outline-offset:3px; }
+
+  .knob{
+    position:relative;
+    width:88px; height:88px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, #9fe8d6, #46a794 45%, #235e51 80%);
+    box-shadow:
+      0 8px 16px rgba(0,0,0,0.6),
+      inset 0 2px 3px rgba(255,255,255,0.5),
+      inset 0 -6px 10px rgba(0,0,0,0.45);
+    cursor:grab;
+    touch-action:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .knob:active{ cursor:grabbing; }
+  .knob::after{
+    content:"";
+    position:absolute;
+    width:60%; height:60%;
+    border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #56b5a0, #24594d 70%);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -3px 6px rgba(0,0,0,0.4);
+  }
+  .knob .indicator{
+    position:absolute;
+    top:6px; left:50%;
+    width:3px; height:14px;
+    background:var(--ink);
+    border-radius:2px;
+    transform-origin:50% 38px;
+    transform:translateX(-50%) rotate(var(--knob-rot, 0deg));
+    z-index:3;
+  }
+
+  .hint{
+    text-align:center;
+    font-family:'Share Tech Mono', monospace;
+    font-size:11px;
+    color:var(--static);
+    margin-top:10px;
+    letter-spacing:0.04em;
+  }
+
+  /* ---- LETTER REVEAL ---- */
+  .letter{
+    width:min(92vw, 420px);
+    margin-top:22px;
+    background:var(--paper);
+    color:var(--paper-ink);
+    border-radius:4px;
+    padding:26px 24px 22px;
+    box-shadow:0 20px 40px -18px rgba(0,0,0,0.6);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(0,0,0,0.04), transparent 60%);
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    transform:translateY(-6px);
+    transition:max-height .6s ease, opacity .5s ease .1s, transform .5s ease .1s, padding .6s ease, margin .6s ease;
+  }
+  .letter.open{
+    max-height:900px;
+    opacity:1;
+    transform:translateY(0);
+  }
+  .letter h2{
+    font-style:italic;
+    font-weight:500;
+    font-size:19px;
+    margin:0 0 12px;
+    color:#1c6a5c;
+  }
+  .letter p{
+    font-size:17px;
+    line-height:1.65;
+    margin:0 0 12px;
+  }
+  .letter .sign{
+    text-align:right;
+    font-style:italic;
+    margin-top:16px;
+    font-size:17px;
+  }
+  .letter .retune{
+    display:block;
+    margin:18px auto 0;
+    background:none;
+    border:1px solid #1c6a5caa;
+    color:#1c6a5c;
+    font-family:'Share Tech Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    padding:8px 16px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:background .2s ease, color .2s ease;
+  }
+  .letter .retune:hover{ background:#1c6a5c; color:var(--paper); }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px;
+    padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="lang-switch" role="group" aria-label="Cambiar idioma / Переключить язык">
+    <button id="langEs" type="button">ES</button>
+    <button id="langRu" type="button" class="active">RU</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <div class="preamble">
+    <div class="eyebrow" id="eyebrow">ПЕРЕДАЧА НА КОРОТКИХ ВОЛНАХ</div>
+    <h1 id="heading">где-то между этим местом и Россией это всё ещё звучит</h1>
+  </div>
+
+  <div class="radio" id="radio">
+    <div class="plate" id="plate">РАДИО · МОД. 1957 · РУЧНАЯ НАСТРОЙКА</div>
+
+    <div class="glass" id="glassBox">
+      <canvas id="staticCanvas"></canvas>
+      <div class="readout">
+        <span class="freq-num" id="freqNum">89.1</span>
+        <span class="freq-unit">MHz</span>
+      </div>
+      <div class="station-name" id="stationName">— шум —</div>
+      <div class="bars" id="bars"></div>
+    </div>
+
+    <div class="scale-wrap">
+      <div class="scale">
+        <svg viewBox="0 0 300 34" preserveAspectRatio="none">
+          <!-- tick marks -->
+          <g stroke="#7fa6a3" stroke-width="1" opacity="0.7">
+            <!-- generated by JS -->
+          </g>
+        </svg>
+        <div class="needle" id="needle" style="left:0%"></div>
+      </div>
+      <div class="scale-labels">
+        <span>87.5</span><span>97.5</span><span>108.0</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="nudge" id="down" aria-label="Понизить частоту">−</button>
+      <div class="knob" id="knob" tabindex="0" role="slider" aria-label="Ручка настройки"
+           aria-valuemin="87.5" aria-valuemax="108" aria-valuenow="89.1">
+        <div class="indicator" id="indicator"></div>
+      </div>
+      <button class="nudge" id="up" aria-label="Повысить частоту">+</button>
+    </div>
+
+    <div class="hint" id="hint">крути ручку, пока не найдёшь её сигнал</div>
+  </div>
+
+  <div class="letter" id="letter">
+    <h2 id="letterH2">103.7 — Радио Marina, в эфире</h2>
+    <p id="p1"></p>
+    <p id="p2"></p>
+    <p id="p3"></p>
+    <div class="sign" id="p4"></div>
+    <button class="retune" id="retune">настроить заново</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const MIN = 87.5, MAX = 108.0, TARGET = 103.7, STEP = 0.1;
+  let freq = 89.1;
+  let locked = false;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const I18N = {
+    ru: {
+      title: "103.7 — Радио Marina",
+      eyebrow: "ПЕРЕДАЧА НА КОРОТКИХ ВОЛНАХ",
+      heading: "где-то между этим местом и Россией это всё ещё звучит",
+      plate: "РАДИО · МОД. 1957 · РУЧНАЯ НАСТРОЙКА",
+      noise: "— шум —",
+      downLabel: "Понизить частоту",
+      upLabel: "Повысить частоту",
+      knobLabel: "Ручка настройки",
+      hintDefault: "крути ручку, пока не найдёшь её сигнал",
+      hintFound: "сигнал найден",
+      almost: "◦ почти нашёл ◦",
+      lockedName: "RADIO MARINA · 103.7",
+      ghosts: [
+        "... прогноз погоды ...", "— слабый сигнал —", "◦ помехи ◦",
+        "... голоса на другом языке ...", "— не определено —", "◦ только статика ◦",
+        "... далёкая музыка, прерывается ...", "— здесь ничего —"
+      ],
+      letterH2: "103.7 — Радио Marina, в эфире",
+      lines: [
+        "Не знаю, доходит ли это как-то иначе, пройдя столько километров помех, но мне хотелось, чтобы это дошло именно так: как то, что нужно искать, крутить, бережно настраивать — потому что именно этим мы, по сути, и занимаемся каждый день на таком расстоянии.",
+        "Из всех частот в мире, сквозь весь этот шум, я всё равно настраиваюсь именно на твою. И когда сигнал становится чистым, когда наконец слышно каждое слово, я понимаю: стоило крутить эту ручку, чтобы найти тебя.",
+        "Расстояние ничего не выключает, оно просто добавляет между нами помехи. И всё равно ты здесь, ясно и чётко, на 103.7, каждый раз, когда я тебя ищу."
+      ],
+      sign: "— TAY",
+      retune: "настроить заново"
+    },
+    es: {
+      title: "103.7 — Radio Marina",
+      eyebrow: "TRANSMISIÓN EN ONDA CORTA",
+      heading: "en algún punto entre aquí y Rusia, esto sigue sonando",
+      plate: "RADIO · MOD. 1957 · SINTONÍA MANUAL",
+      noise: "— ruido —",
+      downLabel: "Bajar frecuencia",
+      upLabel: "Subir frecuencia",
+      knobLabel: "Perilla de sintonía",
+      hintDefault: "gira la perilla hasta encontrar su señal",
+      hintFound: "señal encontrada",
+      almost: "◦ casi ahí ◦",
+      lockedName: "RADIO MARINA · 103.7",
+      ghosts: [
+        "... pronóstico del clima ...", "— señal débil —", "◦ interferencia ◦",
+        "... voces en otro idioma ...", "— sin identificar —", "◦ solo estática ◦",
+        "... música lejana, cortada ...", "— nada aquí —"
+      ],
+      letterH2: "103.7 — Radio Marina, transmitiendo",
+      lines: [
+        "No sé si esto llega distinto por haber cruzado tantos kilómetros de estática, pero quería que llegara así: como algo que hay que buscar, girar, ajustar con cuidado — porque eso es, un poco, lo que hacemos todos los días desde tan lejos.",
+        "Entre todas las frecuencias del mundo, entre todo el ruido, sigo sintonizando la tuya. Y cuando la señal se limpia, cuando por fin se entiende cada palabra, sé que valió la pena mover el dial hasta encontrarte.",
+        "La distancia no apaga nada, solo le pone estática de por medio. Y aun así aquí sigues, clara, a 103.7, cada vez que te busco."
+      ],
+      sign: "— TAY",
+      retune: "volver a sintonizar"
+    }
+  };
+
+  let currentLang = 'ru';
+
+  const freqNum = document.getElementById('freqNum');
+  const stationName = document.getElementById('stationName');
+  const glassBox = document.getElementById('glassBox');
+  const needle = document.getElementById('needle');
+  const indicator = document.getElementById('indicator');
+  const knob = document.getElementById('knob');
+  const bars = document.getElementById('bars');
+  const hint = document.getElementById('hint');
+  const letter = document.getElementById('letter');
+  const radio = document.getElementById('radio');
+  const canvas = document.getElementById('staticCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const pageTitle = document.getElementById('pageTitle');
+  const eyebrowEl = document.getElementById('eyebrow');
+  const headingEl = document.getElementById('heading');
+  const plateEl = document.getElementById('plate');
+  const letterH2El = document.getElementById('letterH2');
+  const retuneBtn = document.getElementById('retune');
+  const downBtn = document.getElementById('down');
+  const upBtn = document.getElementById('up');
+  const langEsBtn = document.getElementById('langEs');
+  const langRuBtn = document.getElementById('langRu');
+
+  function seededGhost(f){
+    const ghosts = I18N[currentLang].ghosts;
+    const i = Math.floor((f*10) ) % ghosts.length;
+    return ghosts[Math.abs(i)];
+  }
+
+  function applyStaticLanguageText(){
+    const t = I18N[currentLang];
+    document.documentElement.lang = currentLang;
+    pageTitle.textContent = t.title;
+    eyebrowEl.textContent = t.eyebrow;
+    headingEl.textContent = t.heading;
+    plateEl.textContent = t.plate;
+    letterH2El.textContent = t.letterH2;
+    retuneBtn.textContent = t.retune;
+    downBtn.setAttribute('aria-label', t.downLabel);
+    upBtn.setAttribute('aria-label', t.upLabel);
+    knob.setAttribute('aria-label', t.knobLabel);
+    hint.textContent = locked ? t.hintFound : t.hintDefault;
+    langEsBtn.classList.toggle('active', currentLang === 'es');
+    langRuBtn.classList.toggle('active', currentLang === 'ru');
+  }
+
+  function setLanguage(lang){
+    if(lang === currentLang) return;
+    currentLang = lang;
+    applyStaticLanguageText();
+    render();
+    if(typedOnce && locked){
+      // refresh the already-revealed letter text in the new language
+      const t = I18N[currentLang];
+      document.getElementById('p1').textContent = t.lines[0];
+      document.getElementById('p2').textContent = t.lines[1];
+      document.getElementById('p3').textContent = t.lines[2];
+      document.getElementById('p4').textContent = t.sign;
+    }
+  }
+
+  langEsBtn.addEventListener('click', ()=> setLanguage('es'));
+  langRuBtn.addEventListener('click', ()=> setLanguage('ru'));
+
+  // build tick marks on the scale svg
+  const svg = document.querySelector('.scale svg g');
+  for(let f = MIN; f <= MAX + 0.001; f += 0.5){
+    const x = ((f - MIN) / (MAX - MIN)) * 300;
+    const tall = Math.round(f) === f;
+    const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1", x); line.setAttribute("x2", x);
+    line.setAttribute("y1", tall ? 6 : 12); line.setAttribute("y2", 26);
+    svg.appendChild(line);
+  }
+
+  // signal bars
+  const NBARS = 14;
+  for(let i=0;i<NBARS;i++){
+    const s = document.createElement('span');
+    bars.appendChild(s);
+  }
+  const barEls = bars.querySelectorAll('span');
+
+  function distance(){ return Math.abs(freq - TARGET); }
+  function strength(){
+    const d = distance();
+    return Math.max(0, 1 - d / 4); // 0..1, 1 = perfectly tuned
+  }
+
+  function render(){
+    const t = I18N[currentLang];
+    freqNum.textContent = freq.toFixed(1);
+    const pct = ((freq - MIN) / (MAX - MIN)) * 100;
+    needle.style.left = pct + '%';
+    knob.setAttribute('aria-valuenow', freq.toFixed(1));
+
+    const s = strength();
+    glassBox.style.setProperty('--static-opacity', locked ? 0 : Math.max(0.15, 1 - s*0.85));
+
+    if(locked){
+      stationName.textContent = t.lockedName;
+      radio.classList.add('locked');
+    } else {
+      radio.classList.remove('locked');
+      if(distance() < 0.6){
+        stationName.textContent = t.almost;
+      } else {
+        stationName.textContent = seededGhost(freq);
+      }
+    }
+
+    // bars: static jitter vs calm "equalizer" wave when locked
+    barEls.forEach((b, i) => {
+      let h;
+      if(locked){
+        h = 30 + Math.round(40 * Math.abs(Math.sin((Date.now()/500) + i)));
+      } else {
+        h = 15 + Math.random() * (20 + s*40);
+      }
+      b.style.height = h + '%';
+    });
+
+    if(Math.abs(freq - TARGET) < STEP/2 + 0.001 && !locked){
+      lockIn();
+    }
+  }
+
+  function lockIn(){
+    locked = true;
+    freq = TARGET;
+    hint.textContent = I18N[currentLang].hintFound;
+    revealLetter();
+    render();
+  }
+
+  function resetTuning(){
+    locked = false;
+    freq = 89.1;
+    hint.textContent = I18N[currentLang].hintDefault;
+    letter.classList.remove('open');
+    document.querySelectorAll('.letter p, .letter .sign').forEach(el => el.textContent = '');
+    typedOnce = false;
+    render();
+    radio.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'center'});
+  }
+
+  let typedOnce = false;
+
+  function revealLetter(){
+    letter.classList.add('open');
+    if(typedOnce) return;
+    typedOnce = true;
+    const t = I18N[currentLang];
+    const targets = [document.getElementById('p1'), document.getElementById('p2'), document.getElementById('p3')];
+    const sign = document.getElementById('p4');
+
+    if(reduceMotion){
+      targets.forEach((el,i)=> el.textContent = t.lines[i]);
+      sign.textContent = t.sign;
+      setTimeout(()=> letter.scrollIntoView({behavior:'auto', block:'center'}), 100);
+      return;
+    }
+
+    let li = 0;
+    function typeLine(){
+      const t2 = I18N[currentLang];
+      if(li >= t2.lines.length){
+        sign.textContent = t2.sign;
+        return;
+      }
+      const el = targets[li];
+      const text = t2.lines[li];
+      let ci = 0;
+      const iv = setInterval(()=>{
+        el.textContent = text.slice(0, ci);
+        ci++;
+        if(ci > text.length){
+          clearInterval(iv);
+          li++;
+          setTimeout(typeLine, 250);
+        }
+      }, 14);
+    }
+    setTimeout(()=>{
+      typeLine();
+      letter.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 350);
+  }
+
+  function setFreq(v){
+    if(locked) return;
+    freq = Math.min(MAX, Math.max(MIN, Math.round(v*10)/10));
+    render();
+  }
+
+  // knob drag → angle → frequency
+  let dragging = false, startAngle = 0, startFreq = 0;
+  function angleFromCenter(cx, cy, x, y){
+    return Math.atan2(y - cy, x - cx) * 180 / Math.PI;
+  }
+  function pointerPos(e){
+    const t = e.touches ? e.touches[0] : e;
+    return {x: t.clientX, y: t.clientY};
+  }
+  function onPointerDown(e){
+    if(locked) return;
+    dragging = true;
+    const rect = knob.getBoundingClientRect();
+    const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+    const p = pointerPos(e);
+    startAngle = angleFromCenter(cx, cy, p.x, p.y);
+    startFreq = freq;
+    e.preventDefault();
+  }
+  function onPointerMove(e){
+    if(!dragging) return;
+    const rect = knob.getBoundingClientRect();
+    const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+    const p = pointerPos(e);
+    const a = angleFromCenter(cx, cy, p.x, p.y);
+    let delta = a - startAngle;
+    if(delta > 180) delta -= 360;
+    if(delta < -180) delta += 360;
+    const newFreq = startFreq + delta * 0.08;
+    setFreq(newFreq);
+    indicator.style.setProperty('--knob-rot', (delta*1.2) + 'deg');
+  }
+  function onPointerUp(){ dragging = false; }
+
+  knob.addEventListener('mousedown', onPointerDown);
+  knob.addEventListener('touchstart', onPointerDown, {passive:false});
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('touchmove', onPointerMove, {passive:false});
+  window.addEventListener('mouseup', onPointerUp);
+  window.addEventListener('touchend', onPointerUp);
+
+  knob.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowRight'){ setFreq(freq + STEP); e.preventDefault(); }
+    if(e.key === 'ArrowLeft'){ setFreq(freq - STEP); e.preventDefault(); }
+  });
+
+  downBtn.addEventListener('click', ()=> setFreq(freq - STEP));
+  upBtn.addEventListener('click', ()=> setFreq(freq + STEP));
+  retuneBtn.addEventListener('click', resetTuning);
+
+  // static noise canvas
+  function resizeCanvas(){
+    canvas.width = glassBox.clientWidth;
+    canvas.height = glassBox.clientHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function drawStatic(){
+    if(!reduceMotion){
+      const w = canvas.width, h = canvas.height;
+      const imgData = ctx.createImageData(w, h);
+      for(let i=0;i<imgData.data.length;i+=4){
+        const v = Math.random()*255;
+        imgData.data[i]=v; imgData.data[i+1]=v; imgData.data[i+2]=v; imgData.data[i+3]=40;
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+    render();
+    requestAnimationFrame(reduceMotion ? ()=>{} : drawStatic);
+  }
+
+  applyStaticLanguageText();
+
+  if(reduceMotion){
+    render();
+  } else {
+    drawStatic();
+  }
+})();
+</script>
+
+</body>
+</html>
